@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Show editor · FlashCue Contributor Portal</title>
+  <link rel="stylesheet" href="/css/portal.css" />
+</head>
+<body>
+  <div class="app-body">
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-mark" aria-hidden="true">F</div>
+        <div>
+          <div class="logo-text">FlashCue</div>
+          <div class="logo-sub">Contributors</div>
+        </div>
+      </div>
+      <nav class="sidebar" aria-label="Main">
+        <a class="item nav-link" data-page="dashboard" href="/dashboard.html">Dashboard</a>
+      </nav>
+      <div class="user">
+        <div class="avatar" id="avatar" aria-hidden="true">--</div>
+        <div>
+          <div class="name" id="userName">Contributor</div>
+          <div class="role" id="userRole">Lighting Designer</div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-ghost logout-btn" id="logoutBtn">Sign out</button>
+    </aside>
+
+    <main class="main">
+      <div class="main-header">
+        <div>
+          <h1 id="showEditorTitle">Show editor</h1>
+          <p id="showEditorSubtitle">Save production metadata, accessibility notes, and flash cues.</p>
+        </div>
+        <div class="header-actions">
+          <a class="btn btn-secondary" href="/dashboard.html">Back to dashboard</a>
+          <button type="button" class="btn btn-primary" id="submitShowBtn" hidden>Submit for review</button>
+        </div>
+      </div>
+
+      <div class="main-content page-alerts">
+        <p class="form-success" id="showSuccess" role="status"></p>
+        <p class="form-error" id="showError" role="alert"></p>
+      </div>
+
+      <section class="main-content" id="showSummarySection" hidden>
+        <div class="panel show-summary-panel">
+          <div class="panel-header">
+            <h2>Show details</h2>
+            <button type="button" class="btn btn-secondary" id="editShowBtn">Edit show details</button>
+          </div>
+          <div class="panel-body show-summary-body" id="showSummaryContent"></div>
+        </div>
+      </section>
+
+      <form class="main-content" id="showForm" hidden>
+        <div class="form-grid">
+          <div>
+            <div class="form-section">
+              <h2>Production information</h2>
+              <div class="field-row">
+                <div class="field">
+                  <label for="theater_company">Theater company</label>
+                  <input id="theater_company" name="theater_company" />
+                </div>
+                <div class="field">
+                  <label for="venue">Venue</label>
+                  <input id="venue" name="venue" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="production_name">Production name <span class="req" aria-hidden="true">*</span></label>
+                <input id="production_name" name="production_name" required />
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="date_first_performance">First public performance</label>
+                  <input id="date_first_performance" name="date_first_performance" placeholder="YYYY-MM-DD" />
+                </div>
+                <div class="field">
+                  <label for="date_opening">Opening date</label>
+                  <input id="date_opening" name="date_opening" placeholder="YYYY-MM-DD" />
+                </div>
+              </div>
+            </div>
+            <div class="form-section">
+              <h2>Contacts</h2>
+              <div class="field-row">
+                <div class="field">
+                  <label for="lighting_designer">Lighting designer</label>
+                  <input id="lighting_designer" name="lighting_designer" />
+                </div>
+                <div class="field">
+                  <label for="stage_manager">Stage manager</label>
+                  <input id="stage_manager" name="stage_manager" />
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="primary_contact">Primary contact</label>
+                  <input id="primary_contact" name="primary_contact" />
+                </div>
+                <div class="field">
+                  <label for="contact_email">Contact email</label>
+                  <input id="contact_email" name="contact_email" type="email" />
+                </div>
+              </div>
+            </div>
+            <div class="form-section">
+              <h2>Accessibility notes</h2>
+              <div class="field">
+                <label for="seating_recommendation">Seating recommendation</label>
+                <textarea id="seating_recommendation" name="seating_recommendation"></textarea>
+              </div>
+              <div class="field">
+                <label for="content_warnings">Other content warnings</label>
+                <textarea id="content_warnings" name="content_warnings"></textarea>
+              </div>
+              <div class="field">
+                <label for="relaxed_performance_dates">Relaxed performance dates</label>
+                <input id="relaxed_performance_dates" name="relaxed_performance_dates" />
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="helper-card"><strong>Draft workflow</strong><br />Save show details, then add cue rows below. Submit when complete.</div>
+            <div class="helper-card" id="showFormHelper"><strong>Required for submission</strong><br />Production name and at least one cue are required.</div>
+            <button class="btn btn-primary btn-block" type="submit" id="saveShowBtn">Save show</button>
+            <button class="btn btn-secondary btn-block" type="button" id="cancelShowEditBtn" hidden>Cancel editing</button>
+          </div>
+        </div>
+      </form>
+
+      <section class="main-content cue-section" id="cueSection" hidden>
+        <h2 class="section-heading">Flash cues</h2>
+        <p class="section-intro">Add or edit individual flashing light sequences for this show.</p>
+        <form id="cueForm">
+          <div class="form-grid">
+            <div class="panel cue-list-panel">
+              <div class="panel-header">
+                <h2>Current cues</h2>
+                <button type="button" class="btn btn-secondary" id="addCueBtn">Add new cue</button>
+              </div>
+              <div class="panel-body" id="cueList"></div>
+            </div>
+            <div id="cueFormDiv" class="panel">
+              <div>
+                <div class="panel-header">
+                  <h2>Create or edit flash cue</h2>
+                  <button class="btn btn-secondary" type="button" id="cancelCueEditBtn" hidden>Cancel</button>
+                </div>
+              </div>
+              <div class="form-section">
+                <h2>Timing</h2>
+                <div class="field-row">
+                  <div class="field">
+                    <label for="start_time">Start time <span class="req" aria-hidden="true">*</span></label>
+                    <input id="start_time" name="start_time" required placeholder="MM:SS or HH:MM:SS" autocomplete="off" />
+                    <p class="field-help">Use MM:SS (e.g. 49:36) or HH:MM:SS (e.g. 1:05:30).</p>
+                    <p class="field-error" id="startTimeError" role="alert"></p>
+                  </div>
+                  <div class="field">
+                    <label for="start_time_approximate">Start time approximate?</label>
+                    <select id="start_time_approximate" name="start_time_approximate">
+                      <option value="1">Approximate</option>
+                      <option value="0">Exact</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="field-row">
+                  <div class="field">
+                    <label for="duration">Duration in seconds <span class="req" aria-hidden="true">*</span></label>
+                    <input id="duration" name="duration" type="number" min="1" step="1" required placeholder="7" inputmode="numeric" />
+                    <p class="field-error" id="durationError" role="alert"></p>
+                  </div>
+                  <div class="field">
+                    <label for="duration_approximate">Duration approximate?</label>
+                    <select id="duration_approximate" name="duration_approximate">
+                      <option value="1">Approximate</option>
+                      <option value="0">Exact</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="form-section">
+                <h2>Characteristics</h2>
+                <div class="field">
+                  <label for="source">Source of flash <span class="req" aria-hidden="true">*</span></label>
+                  <input id="source" name="source" required />
+                </div>
+                <div class="field">
+                  <label for="colors">Color(s) <span class="req" aria-hidden="true">*</span></label>
+                  <input id="colors" name="colors" required />
+                </div>
+                <div class="field">
+                  <label for="frequency">Flash frequency (optional)</label>
+                  <select id="frequency" name="frequency">
+                    <option value="">Select frequency</option>
+                    <option value="slow">Slow</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="fast">Fast</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-section">
+                <h2>Scene context</h2>
+                <div class="field">
+                  <label for="prior_scene_description">Prior scene description <span class="req" aria-hidden="true">*</span></label>
+                  <textarea id="prior_scene_description" name="prior_scene_description" required></textarea>
+                </div>
+                <div class="field">
+                  <label for="scene_description">Scene description <span class="req" aria-hidden="true">*</span></label>
+                  <textarea id="scene_description" name="scene_description" required></textarea>
+                </div>
+                <div class="field">
+                  <label for="additional_info">Additional info</label>
+                  <textarea id="additional_info" name="additional_info"></textarea>
+                </div>
+              </div>
+              <div class="panel-header">
+                <button class="btn btn-primary" type="submit" id="cueSubmitBtn">Save cue</button>
+                <p class="form-success" id="cueSuccess" role="status"></p>
+                <p class="form-error" id="cueError" role="alert"></p>
+              </div>
+            </div>
+            
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+  <script src="/js/auth.js"></script>
+  <script src="/js/show.js"></script>
+</body>
+</html>

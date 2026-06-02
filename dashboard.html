@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard · FlashCue Contributor Portal</title>
+  <link rel="stylesheet" href="/css/portal.css" />
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script> <!--SheetJS for Excel file upload option-->
+</head>
+<body>
+  <div class="app-body">
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-mark" aria-hidden="true">F</div>
+        <div>
+          <div class="logo-text">FlashCue</div>
+          <div class="logo-sub">Contributors</div>
+        </div>
+      </div>
+      <nav class="sidebar" aria-label="Main">
+        <a class="item nav-link active" data-page="dashboard" href="/dashboard.html">Dashboard</a>
+        <!-- <a class="item nav-link" data-page="shows" href="/dashboard.html">Shows</a> -->
+      </nav>
+      <div class="user">
+        <div class="avatar" id="avatar" aria-hidden="true">--</div>
+        <div>
+          <div class="name" id="userName">Contributor</div>
+          <div class="role" id="userRole">Lighting Designer</div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-ghost logout-btn" id="logoutBtn">Sign out</button>
+    </aside>
+
+    <main class="main" id="main">
+      <div class="main-header">
+        <div>
+          <h1 id="welcomeTitle">Welcome</h1>
+          <p>Manage and submit your show flash data.</p>
+        </div>
+        <a class="btn btn-primary" href="/show.html">+ New show</a>
+        <button class="btn btn-primary" id="uploadShowBtn" type="button" command="show-modal" commandfor="uploadModal">Upload show data</button>
+      </div>
+      <div class="main-content">
+        <div class="stat-row">
+          <div class="kpi"><div class="l">Shows</div><div class="v" id="kpiShows">0</div></div>
+          <div class="kpi"><div class="l">Flash cues</div><div class="v" id="kpiCues">0</div></div>
+          <div class="kpi"><div class="l">In review</div><div class="v" id="kpiReview">0</div></div>
+          <div class="kpi"><div class="l">Drafts</div><div class="v" id="kpiDraft">0</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Your shows</h2>
+            <p class="form-success" id="showSuccess" role="status"></p>
+            <p class="form-error" id="showError" role="alert"></p>
+          </div>
+          <div class="panel-body" id="dashboardShowRows"></div>
+        </div>
+      </div>
+
+      <dialog id="uploadModal">
+        <h2>Upload show data via Excel file</h2>
+        <p>You can add multiple cues at once by uploading an Excel spreadsheet containing your show data. </p>
+        <form class="upload-form" id="fileUploadForm">
+          <label for="fileChooser" class="file-lable">Click to browse</label>
+          <input type="file" id="fileChooser" class="file-input" name="uploaded_file" accept=".xlsx, .xls" required>
+          <!-- <input type="submit" value="Upload" id="submitFile"> -->
+          <button id="closeUploadShowBtn" type="button" autofocus command="close" commandfor="uploadModal">Close</button>
+        </form>
+      </dialog>
+    </main>
+  </div>
+  <script src="/js/auth.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>
