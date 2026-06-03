@@ -46,7 +46,7 @@ async function requireAuth() {
 
 async function redirectIfAuthenticated() {
   const user = await fetchCurrentUser();
-  if (user) window.location.replace('/dashboard.html');
+  if (user) window.location.replace('dashboard.html');
 }
 
 function populateUserSidebar(user) {
