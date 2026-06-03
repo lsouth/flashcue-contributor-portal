@@ -14,7 +14,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     });
     setToken(data.token);
     console.log("Redirecting to dashboard...")
-    window.location.replace('/dashboard.html');
+    window.location.replace('dashboard.html');
   } catch (err) {
     setText('loginError', err.message);
   }
