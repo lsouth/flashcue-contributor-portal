@@ -42,7 +42,7 @@ function renderDashboard() {
 
   const sidebar = document.querySelector("nav.sidebar");
   shows.forEach((s) => {
-    sidebar.insertAdjacentHTML("beforeend",`<a class="item nav-link" href="/show.html?id=${s.id}">${s.production_name}</a>`);
+    sidebar.insertAdjacentHTML("beforeend",`<a class="item nav-link" href="show.html?id=${s.id}">${s.production_name}</a>`);
     console.log("Adding " + s.production_name + " to sidebar.");
   });
 
@@ -61,14 +61,14 @@ function renderDashboard() {
       (show) => `
       <div class="show-row" role="row">
         <div class="col-title">
-          <a class="title show-title-link" href="/show.html?id=${show.id}">${escapeHtml(show.production_name || 'Untitled show')}</a>
+          <a class="title show-title-link" href="show.html?id=${show.id}">${escapeHtml(show.production_name || 'Untitled show')}</a>
           <div class="venue">${escapeHtml(show.venue || 'Venue not set')}</div>
         </div>
         <div class="col-cues meta">${show.cue_count || 0}</div>
         <div class="col-date meta">${new Date(show.updated_at).toLocaleDateString()}</div>
         <div class="col-status"><span class="badge ${escapeHtml(show.status)}">${escapeHtml(show.status)}</span></div>
         <div class="col-actions">
-          <a class="btn btn-secondary" href="/show.html?id=${show.id}">Edit</a>
+          <a class="btn btn-secondary" href="show.html?id=${show.id}">Edit</a>
           <a class="btn btn-warning delete-show-btn" data-id="${show.id}">Delete</a>
         </div>
       </div>
