@@ -14,7 +14,7 @@ async function api(path, options = {}) {
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
   const DB_URL = "https://flashcue-backend.onrender.com"
-  const res = await fetch(DB_PATH + path, { ...options, headers });
+  const res = await fetch(DB_URL + path, { ...options, headers });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new Error(body.error || `Request failed (${res.status})`);
