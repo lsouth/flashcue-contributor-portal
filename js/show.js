@@ -399,7 +399,7 @@ async function initShowPage() {
   const sidebar = document.querySelector("nav.sidebar");
     shows = JSON.parse(localStorage.getItem("shows"));
     shows.forEach((s) => {
-      sidebar.insertAdjacentHTML("beforeend",`<a class="item nav-link ${s.id == showId ? "active" : ""}" href="/show.html?id=${s.id}">${s.production_name}</a>`);
+      sidebar.insertAdjacentHTML("beforeend",`<a class="item nav-link ${s.id == showId ? "active" : ""}" href="show.html?id=${s.id}">${s.production_name}</a>`);
   });
   document.querySelector("#addCueBtn").addEventListener("click", () => {
     setDisplayCueForm(true);
