@@ -1,5 +1,5 @@
 const TOKEN_KEY = 'flashcue_token';
-const dev_mode = true;
+const dev_mode = false;
 
 function getToken() {
   return localStorage.getItem(TOKEN_KEY) || '';
