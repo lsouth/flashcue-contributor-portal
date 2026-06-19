@@ -1,4 +1,5 @@
 const TOKEN_KEY = 'flashcue_token';
+const dev_mode = true;
 
 function getToken() {
   return localStorage.getItem(TOKEN_KEY) || '';
@@ -13,7 +14,7 @@ async function api(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
-  const DB_URL = "https://flashcue-backend.onrender.com"
+  const DB_URL = dev_mode ? "http://localhost:3000" : "https://flashcue-backend.onrender.com"
   const res = await fetch(DB_URL + path, { ...options, headers });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) {

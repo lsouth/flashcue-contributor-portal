@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Request an account · FlashCue Contributor Portal</title>
+  <link rel="stylesheet" href="css/portal.css" />
+</head>
+<body class="register-page">
+  <div class="app-body app-body-register">
+    <section class="screen-login active">
+      <div class="login-brand">
+        <div class="mark" aria-hidden="true">F</div>
+        <h1>Contributor portal</h1>
+        <p>Request a FlachCue contributor account to be able to record flash sequence data for your productions.</p>
+        <ul>
+          <li>Track production metadata and safety notes</li>
+          <li>Add one row per flash instance in your show</li>
+          <li>Submit data for verification and publication</li>
+        </ul>
+      </div>
+      <form class="register-form" id="registerForm">
+        <h2>Request an account</h2>
+        <p class="sub">Please provide your information below to request an account.</p>
+        <div class="field">
+            <label for="name">Full name <span class="req" aria-hidden="true">*</span></label>
+            <input id="name" name="name" type="text">
+            <span class="form-error" id="name-error"></span>
+        </div>
+        <div class="field">
+          <label for="email">Email <span class="req" aria-hidden="true">*</span></label>
+          <input id="email" name="email" type="email" required autocomplete="username" placeholder="designer@theater.com" />
+          <span class="form-error" id="email-error"></span>
+        </div>
+        <div class="field">
+          <label for="password">Password (at least 8 characters) <span class="req" aria-hidden="true">*</span></label>
+          <input id="password" name="password" type="password" required autocomplete="new-password" placeholder="********" />
+          <span class="form-error" id="password-error"></span>
+        </div>
+        <div class="field">
+          <label for="password">Confirm password <span class="req" aria-hidden="true">*</span></label>
+          <input id="confirm-password" name="confirm-password" type="password" required autocomplete="new-password" placeholder="********" />
+          <span class="form-error" id="confirm-password-error"></span>
+        </div>
+        <div class="field">
+            <label for="role">Role <span class="req" aria-hidden="true">*</span></label>
+            <input id="role" name="role" type="text" required>
+            <span class="form-error" id="role-error"></span>
+        </div>
+        <a class="btn btn-primary btn-block" id="registerBtn">Request an account</a>
+        <a class="btn btn-secondary btn-block" id="returnBtn" href="login.html">Return to login</a>
+        <p class="form-error" id="registerError" role="alert"></p>
+      </form>
+    </section>
+  </div>
+  <script src="js/auth.js"></script>
+  <script src="js/register.js"></script>
+</body>
+</html>
