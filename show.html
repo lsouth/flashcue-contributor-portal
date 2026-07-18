@@ -47,6 +47,11 @@
       </div>
 
       <section class="main-content" id="showSummarySection" hidden>
+        <div class="stat-row">
+          <div class="kpi"><div class="l">Total flash cues</div><div class="v" id="kpiShowCues">0</div></div>
+          <div class="kpi"><div class="l">Total flashing time</div><div class="v" id="kpiShowTime">0</div></div>
+        </div>
+        
         <div class="panel show-summary-panel">
           <div class="panel-header">
             <h2>Show details</h2>
@@ -127,8 +132,9 @@
             <button class="btn btn-primary btn-block" type="submit" id="saveShowBtn">Save show</button>
             <button class="btn btn-secondary btn-block" type="button" id="cancelShowEditBtn" hidden>Cancel editing</button>
           </div>
-        </div><span aria-hidden="true">&times;</span>
-</button>
+        </div>
+        <!-- <span aria-hidden="true">&times;</span>
+</button> -->
       </form>
 
       <section class="main-content cue-section" id="cueSection" hidden>

@@ -236,7 +236,7 @@ body.login-page { overflow: auto; }
   border-color: var(--danger);
 }
 .badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; text-transform: capitalize; }
-.badge.published { background: #D1FAE5; color: #065F46; }
+.badge.approved { background: #D1FAE5; color: #065F46; }
 .badge.review { background: #FEF3C7; color: #92400E; }
 .badge.draft { background: #E5E7EB; color: #374151; }
 

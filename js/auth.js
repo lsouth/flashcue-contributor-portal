@@ -15,7 +15,7 @@ async function api(path, options = {}) {
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
   const DB_URL = dev_mode ? "http://localhost:3000" : "https://flashcue-backend.onrender.com"
-  const res = await fetch(DB_URL + path, { ...options, headers });
+  const res = await fetch(DB_URL + path, { ...options, headers });  
   const body = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new Error(body.error || `Request failed (${res.status})`);
@@ -94,6 +94,6 @@ function bindLogout() {
   if (!btn) return;
   btn.addEventListener('click', () => {
     setToken('');
-    window.location.replace('/login.html');
+    window.location.replace('./login.html');
   });
 }

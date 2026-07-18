@@ -14,6 +14,13 @@ const toTimestamp = (seconds) => {
     .join(':');
 };
 
+const toHMSText = (seconds) => {
+  const d = new Date(seconds * 1000);
+  return [d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds()]
+    .map(n => String(n).padStart(2, '0'))
+    .join(':');
+}
+
 function isValidTimestamp(value) {
   const v = value.trim();
   const mmss = v.match(TIMESTAMP_MMSS);
@@ -97,7 +104,7 @@ function validateCueForm(form) {
   const payload = Object.fromEntries(new FormData(form).entries());
   payload.start_time = startTime;
   payload.start_sec = getSecondsFromTimestamp(startTime);
-  payload.duration = String(Number(duration));
+  payload.duration = Number(duration);
   payload.end_sec = payload.start_sec + payload.duration;
   payload.act_id = document.querySelector(".cue-list-panel.active").dataset.actId
   return { ok: true, payload };
@@ -260,8 +267,9 @@ function setCueEditMode(editing) {
 }
 
 function setDisplayCueForm(displayForm){
-  const editForm = document.querySelector("#cueFormDiv")
+  const editForm = document.querySelector("#cueFormDiv");
   editForm.style.display = displayForm ? "block" : "none";
+  editForm.scrollIntoView({behavior: "smooth", block: "start"})
 }
 
 function clearCueEdit() {
@@ -369,7 +377,7 @@ function createActDiv(act_data){
 
 
   document.querySelector("#deleteAct" + act_id).addEventListener("click", async (e) => {
-    if (!window.confirm(`Delete Act ${act_id}? This cannot be undone.`)) {
+    if (!window.confirm(`Delete ${label}? This cannot be undone.`)) {
       return;
     }
     deleteAct(act_id);
@@ -454,6 +462,12 @@ async function refreshCues() {
   console.log("Cues received from the server: ");
   console.log(data);
 
+  const totalCues = cuesCache.length;
+  const totalTime = cuesCache.reduce((runningTotal, cue) => runningTotal + (parseInt(cue.duration)|| 0), 0);
+
+  setText('kpiShowCues', totalCues);
+  setText('kpiShowTime', toHMSText(totalTime));
+
   // if (!cuesCache.length) {
   //   host.innerHTML = '<div class="empty">No cues added yet for this show.</div>';
   //   return;
@@ -469,7 +483,7 @@ async function refreshCues() {
     }
   })
 
-  cuesCache.forEach(cue => {
+  cuesCache.forEach((cue, i) => {
     host = cueListDivs[cue.act_id];
     if (host == null){
       return;
@@ -477,7 +491,7 @@ async function refreshCues() {
     host.insertAdjacentHTML("beforeend", `
       <div class="cue-item">
         <div class="cue-item-main">
-          <strong>#${cue.flash_number} ${escapeHtml(cue.source)}</strong><br />
+          <strong>#${i+1} ${escapeHtml(cue.source)}</strong><br />
           <span>${escapeHtml(toTimestamp(cue.start_sec))} · ${escapeHtml(cue.duration)}${/^\d+$/.test(String(cue.duration)) ? ' sec' : ''}</span><br />
           <span>${escapeHtml(cue.colors)}${cue.frequency ? ` · ${escapeHtml(cue.frequency)}` : ''}</span>
         </div>
@@ -615,6 +629,9 @@ document.getElementById('showForm').addEventListener('submit', async (e) => {
         body: JSON.stringify(payload),
       });
       activeShow = data.show; 
+
+
+
       setText('showSuccess', 'Show created. You can now add flash cues below.');
       const url = new URL(window.location.href);
       url.searchParams.set('id', String(activeShow.id));
