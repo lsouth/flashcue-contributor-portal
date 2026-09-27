@@ -1,3 +1,4 @@
+
 let activeShow = null;
 let editingCueId = null;
 let cuesCache = [];
@@ -6,6 +7,8 @@ let pageMode = 'create';
 const FREQUENCY_OPTIONS = ['slow', 'moderate', 'fast'];
 const TIMESTAMP_MMSS = /^(\d{1,2}):([0-5]\d)$/;
 const TIMESTAMP_HMS = /^(\d{1,2}):([0-5]\d):([0-5]\d)$/;
+
+let choices = null;
 
 const toTimestamp = (seconds) => {
   const d = new Date(seconds * 1000);
@@ -59,7 +62,7 @@ function parseDurationSeconds(value) {
 
 function isValidDurationSeconds(value) {
   const v = String(value ?? '').trim();
-  return /^\d+$/.test(v) && Number(v) > 0;
+  return /^\d+(\.\d+)?$/.test(v) && Number(v) > 0;
 }
 
 function clearCueFieldErrors() {
@@ -72,6 +75,40 @@ function clearCueFieldErrors() {
   startTime.removeAttribute('aria-invalid');
   duration.removeAttribute('aria-invalid');
 }
+
+function autoformatTimes(e){
+  let digits = e.target.value.replace(/\D/g, '');
+  digits = digits.slice(0, 6); // cap at 6 digits: hh mm ss
+
+  if (digits.length <= 2) {
+    e.target.value = digits;
+  } else if (digits.length <= 4) {
+    const minutes = digits.slice(0, digits.length - 2);
+    const seconds = digits.slice(-2);
+    e.target.value = `${minutes}:${seconds}`;
+  } else {
+    const hours = digits.slice(0, digits.length - 4);
+    const minutes = digits.slice(-4, -2);
+    const seconds = digits.slice(-2);
+    e.target.value = `${hours}:${minutes}:${seconds}`;
+  }
+}
+
+// Pass single element
+// const element = document.querySelector('#colors');
+// const choices = new Choices(element, {
+//   items: ["Red","Blue","Green"]
+// });
+
+document.addEventListener('DOMContentLoaded', () => {
+  choices = new Choices('#colors', { removeItemButton: true });
+  // choices.setChoiceByValue()
+});
+
+document.getElementById('start_time').addEventListener('input', (e) => {
+  autoformatTimes(e);
+});
+
 
 function validateCueForm(form) {
   clearCueFieldErrors();
@@ -91,7 +128,7 @@ function validateCueForm(form) {
 
   if (!isValidDurationSeconds(duration)) {
     valid = false;
-    setText('durationError', 'Duration must be a whole number of seconds (e.g. 7).');
+    setText('durationError', 'Duration must be a number of seconds (e.g. 7, 12.5).');
     durationEl.classList.add('field-invalid');
     durationEl.setAttribute('aria-invalid', 'true');
   }
@@ -107,6 +144,7 @@ function validateCueForm(form) {
   payload.duration = Number(duration);
   payload.end_sec = payload.start_sec + payload.duration;
   payload.act_id = document.querySelector(".cue-list-panel.active").dataset.actId
+  payload.colors = [...document.getElementById('colors').selectedOptions].map(o => o.value).join(", ");
   return { ok: true, payload };
 }
 
@@ -118,6 +156,10 @@ function getShowIdFromUrl() {
   return id;
 }
 
+function displayDate(date){
+  return new Date(date).toLocaleDateString()
+}
+
 function displayValue(value) {
   const text = value?.toString().trim();
   if (!text) return '<span class="empty">Not provided</span>';
@@ -125,6 +167,7 @@ function displayValue(value) {
 }
 
 function renderShowSummary(show) {
+  console.log(show);
   const host = document.getElementById('showSummaryContent');
   if (!show) {
     host.innerHTML = '';
@@ -142,7 +185,7 @@ function renderShowSummary(show) {
         <div class="show-summary-item"><dt>Director</dt><dd>${displayValue(show.director)}</dd></div>
         <div class="show-summary-item"><dt>Theater company</dt><dd>${displayValue(show.theater_company)}</dd></div>
         <div class="show-summary-item"><dt>Venue</dt><dd>${displayValue(show.venue)}</dd></div>
-        <div class="show-summary-item"><dt>Technical lock date</dt><dd>${displayValue(show.technical_lock_date)}</dd></div>
+        <div class="show-summary-item"><dt>Technical lock date</dt><dd>${displayDate(show.technical_lock_date)}</dd></div>
       </div>
     </div>
     <div class="show-summary-block">
@@ -167,6 +210,9 @@ function fillShowForm(show) {
   const form = document.getElementById('showForm');
   Array.from(form.elements).forEach((el) => {
     if (!el.name) return;
+    if (el.name == "technical_lock_date"){
+      el.valueAsDate = new Date(show.technical_lock_date);
+    }
     el.value = show?.[el.name] ?? '';
   });
 }
@@ -249,19 +295,38 @@ function fillCueForm(cue) {
       el.value = toTimestamp(cue?.start_sec ?? '');
       return;
     }
-    el.value = cue?.[el.name] ?? '';
+    if (el.name === 'description_contains_spoilers') {
+      el.checked = cue.description_contains_spoilers;
+    }
+    if (el.name == "colors"){
+      
+      colorOptions = document.querySelectorAll("#colors option");
+      console.log(cue.colors)
+      choices.removeActiveItems()
+      colorOptions.forEach(option => {
+        if(cue.colors.toLowerCase().includes(option.value)){
+          choices.setChoiceByValue(option.value)
+        }
+      });
+    }
+    else{
+      el.value = cue?.[el.name] ?? '';
+    }
+    
   });
 }
 
 function setCueEditMode(editing) {
   editingCueId = editing ? editing.id : null;
   setDisplayCueForm(true);
-
   if (editing != null){
+    resetActiveCue();
+    document.querySelector(`#cue-${editing.id}`).classList.add("active");
     resetActiveAct();
     document.querySelector(`#cueListPanelAct${editing.act_id}`).classList.add("active");
   }
-  
+
+  document.getElementById("cueFormTitle").textContent = "Edit existing flash cue";
   document.getElementById('cueSubmitBtn').textContent = editing ? 'Update cue' : 'Save cue';
   document.getElementById('cancelCueEditBtn').hidden = !editing;
 }
@@ -269,7 +334,7 @@ function setCueEditMode(editing) {
 function setDisplayCueForm(displayForm){
   const editForm = document.querySelector("#cueFormDiv");
   editForm.style.display = displayForm ? "block" : "none";
-  editForm.scrollIntoView({behavior: "smooth", block: "start"})
+  // editForm.scrollIntoView({behavior: "smooth", block: "start"})
 }
 
 function clearCueEdit() {
@@ -279,6 +344,7 @@ function clearCueEdit() {
   clearCueFieldErrors();
   setDisplayCueForm(false);
   setText('cueError', '');
+  resetActiveCue();
   resetActiveAct();
 }
 
@@ -314,6 +380,15 @@ async function deleteAct(act_id){
   actDiv.remove();
 }
 
+function removeNoFlashesCheckbox(actDiv){
+    // Remove "no flashes" checkbox since we have at least one cue. 
+    const checkbox = actDiv.querySelector('.no-flashes-checkbox')
+    if (checkbox) {
+      checkbox.remove();
+    }
+    // actDiv.querySelector(".add-cue-btn").disabled = true;
+}
+
 function createActDiv(act_data){
   const actsList = document.querySelector("#actsList");
   const label = act_data.label ? act_data.label : `Act ${act_data.act_number}`;
@@ -329,17 +404,25 @@ function createActDiv(act_data){
         </div>
         <div class="panel-header">
           <h2>Current cues</h2>
-          <button type="button" class="btn btn-secondary" id="addCueBtn${act_id}">Add new cue</button>
+          <button type="button" class="btn btn-secondary add-cue-btn" id="addCueBtn${act_id}">Add new cue</button>
+          
+        </div>
+        <div class="field-checkbox no-flashes-checkbox">
+            <input type="checkbox" id="contains-no-flashes" name="contains-no-flashes">
+            <label for="contains-no-flashes">This act contains no flashes. </label>
         </div>
         <div class="panel-body" id="cueList"></div>
       </div>  
   `);
 
   document.querySelector(`#addCueBtn${act_id}`).addEventListener('click', async () => {
+    clearCueEdit();
     setDisplayCueForm(true);
-    const cueFormTitle = document.querySelector("#cueFormTitle").textContent = "Create or edit flash cue for " + label;
+    document.querySelector("#cueFormTitle").textContent = "Create flash cue for " + label;
     resetActiveAct();
-    document.querySelector(`#cueListPanelAct${act_id}`).classList.add("active");
+    const actDiv = document.querySelector(`#cueListPanelAct${act_id}`)
+    actDiv.classList.add("active");
+    removeNoFlashesCheckbox(actDiv);
   });
 
   document.querySelector("#editAct" + act_id).addEventListener("click", async (e) => {
@@ -410,8 +493,15 @@ function resetActiveAct(){
   });
 }
 
+function resetActiveCue(){
+  const cue_items = document.querySelectorAll(".cue-item");
+  cue_items.forEach(item => {
+    item.classList.remove("active");
+  });
+}
+
 function bindCueListActions() {
-  document.querySelectorAll('.edit-cue-btn').forEach((btn) => {
+  document.querySelectorAll('.cue-item').forEach((btn) => {
     btn.addEventListener('click', () => {
       const cueId = btn.dataset.cueId;
       const cue = cuesCache.find((c) => c.id === cueId);
@@ -420,8 +510,13 @@ function bindCueListActions() {
       setCueEditMode(cue);
       setText('cueSuccess', '');
       setText('cueError', '');
-      document.getElementById('cueForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      document.getElementById('source').focus();
+
+      // cueElementLocation = document.querySelector("#cue-" +cueId).getBoundingClientRect().top;
+      // cueForm = document.querySelector("#cueFormDiv");
+      // cueForm.style.position = 'fixed';
+      // cueForm.style.top = `${cueElementLocation}px`;
+      // document.getElementById('cueForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // document.getElementById('source').focus();
     });
   });
 
@@ -476,10 +571,15 @@ async function refreshCues() {
   const act_ids = [...new Set(cuesCache.map(cue => cue.act_id))];
   const cueListDivs = Object.fromEntries(act_ids.map( (id) => [id, document.querySelector("#cueListPanelAct" + id + " #cueList")]));
 
+  act_ids.forEach(id => {
+    // Remove "no flashes" checkbox from any acts that already have at least one cue. 
+    removeNoFlashesCheckbox(document.querySelector("#cueListPanelAct" + id));
+  })
+
   Object.values(cueListDivs).forEach(div => {
     if (div != null){
-    // Clear previous cue lists to make room for refreshed cues.
-    div.replaceChildren();
+      // Clear previous cue lists to make room for refreshed cues.
+      div.replaceChildren();
     }
   })
 
@@ -489,37 +589,19 @@ async function refreshCues() {
       return;
     }
     host.insertAdjacentHTML("beforeend", `
-      <div class="cue-item">
+      <div class="cue-item" id="cue-${cue.id}" data-cue-id="${cue.id}">
         <div class="cue-item-main">
           <strong>#${i+1} ${escapeHtml(cue.source)}</strong><br />
-          <span>${escapeHtml(toTimestamp(cue.start_sec))} · ${escapeHtml(cue.duration)}${/^\d+$/.test(String(cue.duration)) ? ' sec' : ''}</span><br />
+          <span>${escapeHtml(toTimestamp(cue.start_sec))} · ${escapeHtml(cue.duration)}${/\d+(\.\d+)?/.test(String(cue.duration)) ? ' sec' : ''}</span><br />
           <span>${escapeHtml(cue.colors)}${cue.frequency ? ` · ${escapeHtml(cue.frequency)}` : ''}</span>
         </div>
         <div class="cue-item-actions">
-          <button type="button" class="btn btn-secondary btn-sm edit-cue-btn" data-cue-id="${cue.id}">Edit</button>
+          <!-- <button type="button" class="btn btn-secondary btn-sm edit-cue-btn" data-cue-id="${cue.id}">Edit</button> -->
           <button type="button" class="btn btn-secondary btn-sm delete-cue-btn" data-cue-id="${cue.id}">Delete</button>
         </div>
       </div>
     `);
   });
-
-  // host.innerHTML = cuesCache
-  //   .map(
-  //     (cue) => `
-  //     <div class="cue-item">
-  //       <div class="cue-item-main">
-  //         <strong>#${cue.flash_number} ${escapeHtml(cue.source)}</strong><br />
-  //         <span>${escapeHtml(toTimestamp(cue.start_sec))} · ${escapeHtml(cue.duration)}${/^\d+$/.test(String(cue.duration)) ? ' sec' : ''}</span><br />
-  //         <span>${escapeHtml(cue.colors)}${cue.frequency ? ` · ${escapeHtml(cue.frequency)}` : ''}</span>
-  //       </div>
-  //       <div class="cue-item-actions">
-  //         <button type="button" class="btn btn-secondary btn-sm edit-cue-btn" data-cue-id="${cue.id}">Edit</button>
-  //         <button type="button" class="btn btn-secondary btn-sm delete-cue-btn" data-cue-id="${cue.id}">Delete</button>
-  //       </div>
-  //     </div>
-  //   `
-  //   )
-  //   .join('');
 
   bindCueListActions();
 }
@@ -560,7 +642,7 @@ async function initShowPage() {
   const sidebar = document.querySelector("nav.sidebar");
   shows = JSON.parse(localStorage.getItem("shows"));
   sidebar.replaceChildren();
-  sidebar.insertAdjacentHTML("beforeend",`<a class="item nav-link" href="dashboard.html">Dashboard</a>`); 
+  sidebar.insertAdjacentHTML("beforeend",`<a class="item nav-link" href="dashboard.html"><b>Dashboard</b></a>`); 
   shows.forEach((s) => {
       sidebar.insertAdjacentHTML("beforeend",`<a class="item nav-link ${s.id == showId ? "active" : ""}" href="show.html?id=${s.id}">${s.production_name}</a>`);
   });
@@ -568,31 +650,8 @@ async function initShowPage() {
 
 
   document.querySelector("#addActBtn").addEventListener("click", async (e) => {
-    // e.target.disabled = true;
-    // const actPanel = document.querySelector("#actPanel1");
-    // const newInput = document.createElement('input');
-    // const newSubmit = document.createElement('button');
-
-    // newInput.type = 'text';
-    // newInput.className = 'dynamic-input';
-    // newInput.id = 'newActLabel';
-    // newLabel = document.createElement('label');
-    // newLabel.for = 'newActLabel';
-    // newLabel.textContent = 'New act label';
-    // newSubmit.type = 'button';
-    // newSubmit.textContent = 'Create act';
-    // newSubmit.classList.add('btn-secondary');
-    // newSubmit.classList.add('btn');
-
-    // actPanel.appendChild(newLabel);
-    // actPanel.appendChild(newInput);
-    // actPanel.appendChild(newSubmit);
     createAct();
   });
-
-  // document.querySelector("#addCueBtn").addEventListener("click", () => {
-  //   setDisplayCueForm(true);
-  // });
 }
 
 async function initActs(showId){
@@ -613,6 +672,8 @@ document.getElementById('showForm').addEventListener('submit', async (e) => {
   setText('showError', '');
 
   const payload = Object.fromEntries(new FormData(e.currentTarget).entries());
+  console.log("Payload for PUT show");
+  console.log(payload)
 
   try {
     if (activeShow?.id) {
@@ -695,11 +756,15 @@ document.getElementById('cueForm').addEventListener('submit', async (e) => {
   console.log(payload);
   try {
     if (editingCueId) {
+      console.log("Sending PUT request to update cue.")
       await api(`/api/shows/${activeShow.id}/cues/${editingCueId}`, {
         method: 'PUT',
         body: JSON.stringify(payload),
       });
+      console.log("Successfully updated cue.")
       setText('cueSuccess', 'Cue updated.');
+      await refreshCues();
+      document.querySelector(`#cue-${editingCueId}`).classList.add("active");
     } else {
       await api(`/api/shows/${activeShow.id}/cues`, {
         method: 'POST',
@@ -708,10 +773,12 @@ document.getElementById('cueForm').addEventListener('submit', async (e) => {
       form.reset();
       setFrequencyValue('');
       setText('cueSuccess', 'Cue saved.');
+      await refreshCues();
     }
-    clearCueEdit();
-    await refreshCues();
+    // clearCueEdit();
+    
   } catch (err) {
+    console.error('Caught error: ', err)
     setText('cueError', err.message);
   }
 });

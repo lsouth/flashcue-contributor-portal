@@ -181,8 +181,6 @@ function addFileUploadModal(){
         });
 
         const activeShow = result.show; 
-        console.log("dashboard.js:184 Received the following after POST show/");
-        console.log(result.show);
 
         flash_data = jsonData.slice(10);
         console.log(flash_data);

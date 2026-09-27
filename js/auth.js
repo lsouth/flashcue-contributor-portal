@@ -1,5 +1,5 @@
 const TOKEN_KEY = 'flashcue_token';
-const dev_mode = false;
+const dev_mode = true;
 
 function getToken() {
   return localStorage.getItem(TOKEN_KEY) || '';
@@ -79,6 +79,9 @@ function setActiveNav(page) {
 }
 
 function setText(id, text) {
+  if (text){
+    console.log("Setting text (" + id + ") to value: " + text + ".")
+  }
   const el = document.getElementById(id);
   if (el) el.textContent = text;
 }

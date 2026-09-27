@@ -4,7 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Show editor · FlashCue Contributor Portal</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
   <link rel="stylesheet" href="css/portal.css" />
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/choices.js/10.2.0/styles/choices.min.css"> -->
+  
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 </head>
 <body>
   <div class="app-body">
@@ -17,7 +21,7 @@
         </div>
       </div>
       <nav class="sidebar" aria-label="Main">
-        <a class="item nav-link" data-page="dashboard" href="dashboard.html">Dashboard</a>
+        <a class="item nav-link" data-page="dashboard" href="dashboard.html"><b>Dashboard</b></a>
       </nav>
       <div class="user">
         <div class="avatar" id="avatar" aria-hidden="true">--</div>
@@ -91,7 +95,7 @@
                 </div> -->
                 <div class="field">
                   <label for="date_opening">Technical lock date</label>
-                  <input id="date_opening" name="date_opening" placeholder="YYYY-MM-DD" type="date"/>
+                  <input id="date_opening" name="technical_lock_date" placeholder="YYYY-MM-DD" type="date"/>
                 </div>
               </div>
             </div>
@@ -100,18 +104,20 @@
               <div class="field-row">
                 <div class="field">
                   <label for="primary_contact">Primary contact name</label>
-                  <input id="primary_contact" name="primary_contact" />
+                  <input id="primary_contact" name="primary_contact_name" />
+                </div>
+                <div class="field">
+                  <label for="contact_email">Primary contact email</label>
+                  <input id="contact_email" name="primary_contact_email" type="email" />
                 </div>
                 <div class="field">
                   <label for="primary_contact_role">Primary contact role (e.g., lighting designer, stage manager) </label>
                   <input id="primary_contact_role" name="primary_contact_role" />
                 </div>
-                <div class="field">
-                  <label for="contact_email">Primary contact email</label>
-                  <input id="contact_email" name="contact_email" type="email" />
-                </div>
               </div>
             </div>
+          </div>
+          <div>
             <div class="form-section">
               <h2>Accessibility notes</h2>
               <div class="field">
@@ -125,13 +131,14 @@
                 <input id="relaxed_performance_dates" name="relaxed_performance_dates" />
               </div>
             </div>
-          </div>
           <div>
             <div class="helper-card"><strong>Draft workflow</strong><br />Save show details, then add cue rows below. Submit when complete.</div>
             <div class="helper-card" id="showFormHelper"><strong>Required for submission</strong><br />Production name and at least one cue are required.</div>
             <button class="btn btn-primary btn-block" type="submit" id="saveShowBtn">Save show</button>
             <button class="btn btn-secondary btn-block" type="button" id="cancelShowEditBtn" hidden>Cancel editing</button>
           </div>
+          </div>
+          
         </div>
         <!-- <span aria-hidden="true">&times;</span>
 </button> -->
@@ -143,18 +150,7 @@
         <button type="button" class="btn btn-secondary" id="addActBtn">Add new act</button>
         <form id="cueForm">
           <div class="form-grid" id="cueFormGrid">
-            <div id="actsList">
-              <!-- <div class="panel cue-list-panel" id="cueListPanelAct1" data-act-number="1">
-                <div class="act-panel" id="actPanel1">
-                  <h3 class="act-label">Act 1</h3>
-                </div>
-                <div class="panel-header">
-                  <h2>Current cues</h2>
-                  <button type="button" class="btn btn-secondary" id="addCueBtn">Add new cue</button>
-                </div>
-                <div class="panel-body" id="cueList"></div>
-              </div> -->
-            </div>
+            <div id="actsList"></div>
 
             <div id="cueFormDiv" class="panel">
               <div>
@@ -164,83 +160,85 @@
                 </div>
               </div>
               <div class="form-section">
-                <h2>Timing</h2>
+                <h2>Flash Timing</h2>
                 <div class="field-row">
                   <div class="field">
                     <label for="start_time">Start time <span class="req" aria-hidden="true">*</span></label>
-                    <p class="form-info">Please indicate the starting timestamp for each flashing light instance relative to the start of the show, or to the start of the current act (if applicable).</p>
-                    <input id="start_time" name="start_time" required placeholder="MM:SS or HH:MM:SS" autocomplete="off" />
+                    <input id="start_time" name="start_time" required autocomplete="off" />
                     <p class="field-help">Use MM:SS (e.g. 49:36) or HH:MM:SS (e.g. 1:05:30).</p>
                     <p class="field-error" id="startTimeError" role="alert"></p>
                   </div>
                   <div class="field">
-                    <label for="start_time_approximate">Start time approximate?</label>
-                    <select id="start_time_approximate" name="start_time_approximate">
-                      <option value="1">Approximate</option>
-                      <option value="0">Exact</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="field-row">
-                  <div class="field">
-                    <label for="duration">Duration in seconds <span class="req" aria-hidden="true">*</span></label>
-                    <p class="form-info">How long is the flashing light sequence? If you are not sure about the duration of a light sequence or if the duration is variable from one performance to another, please give your best estimate of the maximum number of seconds the flashing lights could possibly last.</p>
-                    <input id="duration" name="duration" type="number" min="1" step="1" required placeholder="7" inputmode="numeric" />
+                    <label for="duration">Duration <span class="req" aria-hidden="true">*</span></label>
+                    <p class="form-info">How long is the flashing light sequence in seconds? If you are not sure or if the duration changes from one performance to another, estimate the maximum possible duration.</p>
+                    <input id="duration" name="duration" type="number" min="0" step="any" required inputmode="numeric" />
+                    <p class="field-help">Estimated time in seconds.</p>
                     <p class="field-error" id="durationError" role="alert"></p>
-                  </div>
-                  <div class="field">
-                    <label for="duration_approximate">Duration approximate?</label>
-                    <select id="duration_approximate" name="duration_approximate">
-                      <option value="1">Approximate</option>
-                      <option value="0">Exact</option>
-                    </select>
                   </div>
                 </div>
               </div>
               <div class="form-section">
-                <h2>Characteristics</h2>
+                <h2>Flash Characteristics</h2>
                 <div class="field">
                   <label for="source">Brief flash description <span class="req" aria-hidden="true">*</span></label>
                   <p class="form-info">What kind of flashes are visible to the audience? For example, perhaps there are camera flashes pointed at the audience, lightning flashes, or a general strobe covering the entire stage area.</p>
                   <input id="source" name="source" required />
                 </div>
-                <div class="field">
-                  <label for="colors">Color(s) <span class="req" aria-hidden="true">*</span></label>
-                  <p class="form-info">What colors are the flashing lights? If there are multiple colors, please use commas to separate the colors in your response (e.g., "red, purple, and pink"). </p>
-                  <input id="colors" name="colors" required />
+                <div class="field-row">
+                  <div class="field">
+                    <label for="colors">Color(s) <span class="req" aria-hidden="true">*</span></label>
+                    <p class="form-info">What colors are the flashing lights? If there are multiple colors, please use commas to separate the colors in your response (e.g., "red, purple, and pink"). </p>
+                    <!-- <input id="colors" name="colors" required /> -->
+                    <select multiple size="5" name="colors" id="colors" required>
+                        <option value="white">White</option>
+                        <option value="red">Red</option>
+                        <option value="orange">Orange</option>
+                        <option value="yellow">Yellow</option>
+                        <option value="green">Green</option>
+                        <option value="blue">Blue</option>
+                        <option value="purple">Purple</option>
+                        <option value="pink">Pink</option>
+                        <option value="amber">Amber</option>
+                        <option value="multicolor">Multicolor</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="frequency">Flash frequency</label>
+                    <p class="form-info">Approximately how fast are the flashes on stage? Estimates in Hertz and BPM for each category are provided in parentheses. </p>
+                    <select id="frequency" name="frequency">
+                      <option value="">Select frequency</option>
+                      <option value="random">Various/random</option>
+                      <option value="chasing">Chasing lights</option>
+                      <option value="single-flash">Single flash</option>
+                      <option value="multiple-single-flashes">Multiple single flashes</option>
+                      <option value="pulsing">Pulsing</option>
+                      <option value="slow">Slow (1 to 5 Hz, 60 to 300 BPM)</option>
+                      <option value="moderate">Moderate (6 to 15 Hz, 360 to 900 BPM)</option>
+                      <option value="fast">Fast (16+ Hz, 960+ BPM)</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
                 </div>
-                <div class="field">
-                  <label for="frequency">Flash frequency</label>
-                  <p class="form-info">Approximately how fast are the flashes on stage? Estimates in Hertz and BPM for each category are provided in parentheses. </p>
-                  <select id="frequency" name="frequency">
-                    <option value="">Select frequency</option>
-                    <option value="single-flash">Single flash</option>
-                    <option value="slow">Slow (1 to 5 Hz, 60 to 300 BPM)</option>
-                    <option value="moderate">Moderate (6 to 15 Hz, 360 to 900 BPM)</option>
-                    <option value="fast">Fast (16+ Hz, 960+ BPM)</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-              </div>
               <div class="form-section">
                 <h2>Scene context</h2>
-                <div class="field">
-                  <label for="scene_description">Scene description <span class="req" aria-hidden="true">*</span></label>
-                  <p class="form-info">Please describe what is happening on stage while flashes are occuring. This information helps audience members with photosensitivity understand what they might have missed while avoiding flashing lights. </p>
-                  <textarea id="scene_description" name="scene_description" required></textarea>
-                </div>
-                <div class="field-checkbox">
-                  <!-- <p class="form-info">Check this box if the scene description you wrote contains any spoilers for the performance. </p> -->
-                  <input id="description_contains_spoilers" name="description_contains_spoilers" type="checkbox" value="contains-spoilers" class="form-checkbox"/>
-                  <label for="description_contains_spoilers">Scene description contains spoilers </label>
-                </div>
-                <div class="field">
-                  <label for="prior_scene_description">Signals or warning signs</label>
-                  <p class="form-info">
-                    Are there any actions or sounds that could be used to signal to audience members that the flashing lights are about to start? 
-                    For example, flashes might start after a certain character walks on stage or after a song ends. 
-                    If applicable, please describe these signals here. </p>
-                  <textarea id="prior_scene_description" name="prior_scene_description"></textarea>
+                <div class="field-row">
+                  <div class="field">
+                    <label for="scene_description">Scene description <span class="req" aria-hidden="true">*</span></label>
+                    <p class="form-info">Please describe what is happening on stage while flashes are occuring. This information helps audience members with photosensitivity understand what they might have missed while avoiding flashing lights. </p>
+                    <textarea id="scene_description" name="scene_description" required></textarea>
+                    <div class="field-checkbox">
+                      <input id="description_contains_spoilers" name="description_contains_spoilers" type="checkbox" value="contains-spoilers" class="form-checkbox"/>
+                     <label for="description_contains_spoilers">Scene description contains spoilers </label>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="prior_scene_description">Signals or warning signs</label>
+                    <p class="form-info">
+                      Are there any actions or sounds that could be used to signal to audience members that the flashing lights are about to start? 
+                      For example, flashes might start after a certain character walks on stage or after a song ends. 
+                      </p>
+                    <textarea id="prior_scene_description" name="prior_scene_description"></textarea>
+                  </div>
                 </div>
                 <div class="field">
                   <label for="additional_info">Additional info</label>
@@ -248,7 +246,7 @@
                   <textarea id="additional_info" name="additional_info"></textarea>
                 </div>
               </div>
-              <div class="panel-header">
+              <div class="panel-header save-cue">
                 <button class="btn btn-primary" type="submit" id="cueSubmitBtn">Save cue</button>
                 <p class="form-success" id="cueSuccess" role="status"></p>
                 <p class="form-error" id="cueError" role="alert"></p>
